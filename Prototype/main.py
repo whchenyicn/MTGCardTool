@@ -179,9 +179,10 @@ def manapro_scraper(url):
 
     return manapro_cardlist
 
-url = 'https://sg-manapro.com/collections/jumpstart-2022'
-manapro_cardlist = manapro_scraper(url)
-write_to_file('manapro_cardlist.csv',manapro_cardlist)
+#url = 'https://sg-manapro.com/collections/jumpstart-2022'
+#url = 'https://sg-manapro.com/collections/mtg-singles-all-products'
+#manapro_cardlist = manapro_scraper(url)
+#write_to_file('manapro_cardlist.csv',manapro_cardlist)
 
 
 
@@ -232,9 +233,10 @@ def gameshaven_scraper(url):
     
 #url = "https://www.gameshaventcg.com/search?page=1&q=%2A%2A"
 # url = 'https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A'
-# gameshaven_cardlist = gameshaven_scraper(url)
-# print(gameshaven_cardlist)
-# write_to_file('gameshaven_cardlist.csv',gameshaven_cardlist)
+#url = 'https://www.gameshaventcg.com/collections/gh-standard-cards'
+#gameshaven_cardlist = gameshaven_scraper(url)
+#print(gameshaven_cardlist)
+#write_to_file('gameshaven_cardlist.csv',gameshaven_cardlist)
 
 def agorahobby_scrape_page(url):
     print(url)
@@ -278,8 +280,9 @@ def agorahobby_scraper(url):
 #searching for lightning bolt doesnt work for some reason but cultivate does
 
 
-# url = 'https://agorahobby.com/store/search?category=mtg&searchfield=cultivate&search=GO'
-# agorahobby_cardlist = agorahobby_scraper(url)
-# write_to_file('agorahobby_cardlist.csv',agorahobby_cardlist)
+#url = 'https://agorahobby.com/store/search?category=mtg&searchfield=cultivate&search=GO'
+#url = 'https://agorahobby.com/store/search?category=mtg&searchfield=b&search=GO'
+#agorahobby_cardlist = agorahobby_scraper(url)
+#write_to_file('agorahobby_cardlist.csv',agorahobby_cardlist)
 
 

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MTG Card Price Comparison</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>MTG Card Price Comparison</h1>
+    <p>Compare prices across local stores in Singapore</p>
+    <input type="text" id="searchInput" placeholder="Search for a card..." />
+  </header>
+
+  <main class="card-grid" id="cardGrid"></main>
+
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    let cards = [];
+    let groupedCards = {};
+    let currentPage = 1;
+    const cardsPerPage = 20;
+
+    async function fetchCards() {
+      try {
+        const response = await fetch("cards.json");
+        cards = await response.json();
+
+        // Group by card name
+        groupedCards = {};
+        for (const card of cards) {
+          if (!groupedCards[card.name]) {
+            groupedCards[card.name] = [];
+          }
+          groupedCards[card.name].push(card);
+        }
+
+        displayCards();
+        setupPagination();
+      } catch (error) {
+        console.error("Failed to load cards.json", error);
+      }
+    }
+
+    function displayCards(filteredNames = null) {
+      const container = document.getElementById("cardGrid");
+      container.innerHTML = "";
+
+      const allNames = filteredNames || Object.keys(groupedCards);
+      const start = (currentPage - 1) * cardsPerPage;
+      const end = start + cardsPerPage;
+      const pageNames = allNames.slice(start, end);
+
+      for (const name of pageNames) {
+        const entries = groupedCards[name];
+        const lowest = entries.reduce((a, b) => (a.price < b.price ? a : b));
+
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        cardDiv.innerHTML = `
+          <h2>${name}</h2>
+          <p>Store: ${lowest.store}</p>
+          <p class="price">$${lowest.price.toFixed(2)}</p>
+          <a href="details.html?name=${encodeURIComponent(name)}">View Details</a>
+        `;
+        container.appendChild(cardDiv);
+      }
+    }
+
+    function setupPagination(filteredNames = null) {
+      const container = document.getElementById("pagination");
+      container.innerHTML = "";
+
+      const totalItems = (filteredNames || Object.keys(groupedCards)).length;
+      const totalPages = Math.ceil(totalItems / cardsPerPage);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        if (i === currentPage) btn.disabled = true;
+        btn.onclick = () => {
+          currentPage = i;
+          displayCards(filteredNames);
+          setupPagination(filteredNames);
+        };
+        container.appendChild(btn);
+      }
+    }
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const term = this.value.toLowerCase();
+      const filtered = Object.keys(groupedCards).filter(name =>
+        name.toLowerCase().includes(term)
+      );
+      currentPage = 1;
+      displayCards(filtered);
+      setupPagination(filtered);
+    });
+
+    fetchCards();
+  </script>
+</body>
+</html>

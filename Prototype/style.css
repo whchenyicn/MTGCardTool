@@ -1,0 +1,49 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll; /* Always show scrollbar */
+}
+
+header {
+  background-color: #1e2a38;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Exactly 4 cards per row */
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  background-color: #f9f9f9;
+}
+
+.card h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.card .price {
+  font-weight: bold;
+  color: #cc0000;
+}

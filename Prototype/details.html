@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Card Details</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1 id="cardName">Card Details</h1>
+    <a href="index.html">← Back to All Cards</a>
+  </header>
+
+  <main id="detailsContainer" class="card-grid"></main>
+
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    const cardName = getQueryParam("name");
+    document.getElementById("cardName").textContent = cardName || "Card Not Found";
+
+    fetch("cards.json")
+      .then(response => response.json())
+      .then(data => {
+        const filtered = data.filter(card => card.name === cardName);
+
+        const container = document.getElementById("detailsContainer");
+        if (filtered.length === 0) {
+          container.innerHTML = "<p>No data found for this card.</p>";
+          return;
+        }
+
+        filtered.forEach(card => {
+          const cardDiv = document.createElement("div");
+          cardDiv.className = "card";
+          cardDiv.innerHTML = `
+            <h2>${card.name}</h2>
+            <p>Set: ${card.set}</p>
+            <p>Condition: ${card.condition}</p>
+            <p>Foil: ${card.foil ? "Yes" : "No"}</p>
+            <p class="price">$${card.price.toFixed(2)}</p>
+            <p>Store: ${card.store}</p>
+          `;
+          container.appendChild(cardDiv);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading details:", err);
+      });
+  </script>
+</body>
+</html>

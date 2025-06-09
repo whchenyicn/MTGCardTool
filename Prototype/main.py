@@ -1,16 +1,26 @@
 from bs4 import BeautifulSoup
+import urllib.request
 from urllib.request import urlopen
 import urllib
 import re
 import csv
 import json
 
-def write_to_file(filename,nestedlist):
-    with open(filename,'w',newline='') as f:
+
+def write_to_csv_file(filename,nestedlist):
+    with open(filename,'w',encoding="utf-8", newline='') as f:
         csv_writer = csv.writer(f)
         for listing in nestedlist:
             csv_writer.writerow(listing)
-            print(listing)
+            # print(listing)
+
+def write_to_json_file(filename,dictlist):
+    with open(filename,'w',encoding="utf-8", newline='') as f:
+        for listing in dictlist:
+            json_object = json.dumps(listing, indent=4)
+            f.write(json_object)
+            
+            # print(listing)
 
 #url = 'https://www.greyogregames.com/search?q=*rhystic+study*'
 #url = 'https://www.greyogregames.com/search?q=*kogla*'
@@ -18,58 +28,40 @@ def write_to_file(filename,nestedlist):
 
 def greyogregames_scrape_page(url):
     print(url)
-    cardlist = []
-    page = urlopen(url)
+    req = urllib.request.Request(url, data=None, 
+    headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+    }    )
+
+    page = urlopen(req)
     html = page.read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
-    product_list = soup.find_all("div",class_="product Norm")
-    for product in product_list:
-        
 
-        name_set = product.find('p',class_="productTitle").get_text()
-        set = re.findall("[(.*?)]", name_set)[0].strip()
-        name = re.sub('[(.*?)]','', name_set).strip()
+    script = soup.find("script", id = "web-pixels-manager-setup") #directly obtains info from the sites script
 
-        # print("Product")
-        # print(product.prettify())
-        # print("\n\n")
-        
+    start = "\"productVariants\":"
+    end = "}});},"
+    z = script.text
+    z1 = z[z.find(start)+len(start):z.rfind(end)].strip()
+    json_dirty = z1[z1.find(start)+len(start):].strip() 
+    #finds the portion of the script containing the json with all the cards information
 
-        available_cards = product.find("div", class_= "hoverMask").find_all("div",class_="addNow single")
-        for card in available_cards:
-            condition_foil,price = card.p.get_text().split('-')
-            price = int(re.sub(r'[^0-9]', '', price))
-            quantity = card["onclick"].split(',')[-2]
-            if 'Foil' in condition_foil:
-                foil = True
-                condition = condition_foil.replace('Foil','').strip()
-            else:
-                foil = False
-                condition = condition_foil.strip()
+    #there are 2 instances of the string start in the script 
+    #so it runs the search twice to get the second instance
+
+    cardlist = json.loads(json_dirty) #parse into json
             
-            
-            # print("Card")
-            # print(card.prettify())
-            # print([name,set,condition,foil,price,quantity])
-            # print(foil)
-            # print("\n\n")
-            
-            cardlist.append([name,set,condition,foil,price,quantity])
-            
-            
-        if len(available_cards) == 0:
-            cardlist.append([name,None,None,None,"Sold Out",0])
-            
-            
-    next_page = soup.find_all("a",class_="pagination-item pagination-next")
-    if len(next_page) > 0:
-        next_page_url = 'https://www.greyogregames.com' + next_page[0]['href']
+
+    next_page = soup.find("ol", class_ = "pagination").contents[-1].find("a") #next_page = None if there is no next page
+
+    if next_page != None:
+        next_page_url = 'https://www.greyogregames.com/' + next_page['href']
     else:
-        next_page_url = None      
-        # print(name)
-        # print(price)
-        # print('\n\n')
+        next_page_url = None   
+ 
     return cardlist,next_page_url
+
+
 
 
 def greyogregames_scraper(url):
@@ -79,6 +71,8 @@ def greyogregames_scraper(url):
         greyogregames_cardlist.extend(cardlist)
 
     return greyogregames_cardlist
+
+
 
 
 # greyogregames_cardlist = greyogregames_scraper(url)
@@ -230,7 +224,7 @@ def gameshaven_scraper(url):
         gameshaven_cardlist.extend(cardlist)
 
     return gameshaven_cardlist
-    
+
 #url = "https://www.gameshaventcg.com/search?page=1&q=%2A%2A"
 # url = 'https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A'
 #url = 'https://www.gameshaventcg.com/collections/gh-standard-cards'
@@ -286,3 +280,14 @@ def agorahobby_scraper(url):
 #write_to_file('agorahobby_cardlist.csv',agorahobby_cardlist)
 
 
+def scrape_to_file(url ,scraper, filename):
+    cardlist = scraper(url)
+    if type(cardlist[0]) == type([0]):
+        write_to_csv_file(filename,cardlist)
+    else:
+        write_to_json_file(filename,cardlist)
+
+        
+# scrape_to_file('https://agorahobby.com/store/search?category=mtg&searchfield=lightning', agorahobby_scraper, "agorahobby_lightning.csv")
+# scrape_to_file('https://www.greyogregames.com/search?q=*rhystic+study*' , greyogregames_scraper, "greyogregames_rhystic.csv")
+scrape_to_file('https://www.greyogregames.com/search?q=*lightning*' , greyogregames_scraper, "greyogregames_lightning.csv")

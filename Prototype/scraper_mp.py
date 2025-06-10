@@ -3,8 +3,54 @@ import urllib.request
 import json
 import re
 
-
 def manapro_scrape_page(url):
+    print(url)
+    cardlist = []
+    req = urllib.request.Request(url, data=None, 
+    headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+    }    )
+
+    page = urllib.request.urlopen(req)
+
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    #print(soup.prettify())
+    def has_hidden(div):
+        return div.has_attr('hidden')
+
+    product_display = soup.find("div",class_="list-view-items products-display")
+    # print(product_display.prettify())
+    product_list = product_display.find_all(has_hidden)
+    for product in product_list:
+        product_details = json.loads(product["data-product-variants"])
+        # print(product_details)
+        cardlist.extend(product_details)
+        
+    
+    next_page = soup.find("div",class_="pag_next").find_all("a")
+    if len(next_page) > 0:
+        next_page_url = 'https://sg-manapro.com/' + next_page[0]['href']
+    else:
+        next_page_url = None      
+#         # print(name)
+#         # print(price)
+#         # print('\n\n')
+
+    return cardlist,next_page_url
+
+
+
+def manapro_scraper(url):
+    manapro_cardlist = []
+    while url != None:
+        cardlist,url = manapro_scrape_page(url)
+        manapro_cardlist.extend(cardlist)
+
+    return manapro_cardlist
+
+
+def webpixels_manapro_scrape_page(url):
     print(url)
 
     req = urllib.request.Request(url, data=None, 
@@ -43,13 +89,6 @@ def manapro_scrape_page(url):
     return cardlist,next_page_url
 
 
-def manapro_scraper(url):
-    manapro_cardlist = []
-    while url != None:
-        cardlist,url = manapro_scrape_page(url)
-        manapro_cardlist.extend(cardlist)
-
-    return manapro_cardlist
 
 
 def old_manapro_scrape_page(url):
@@ -71,7 +110,8 @@ def old_manapro_scrape_page(url):
             name = variant['name']
             sku = variant['sku']
             price = variant['price']
-            cardlist.append([name,sku,price])
+            available = variant['available']
+            cardlist.append([name,sku,price,available])
         
     
         

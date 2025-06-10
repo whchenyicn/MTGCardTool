@@ -39,5 +39,8 @@ def scrape_to_file(url ,scraper, filename):
 # scrape_to_file('https://agorahobby.com/store/search?category=mtg&searchfield=lightning', scraper_ah.agorahobby_scraper, "agorahobby_lightning")
 # scrape_to_file('https://www.greyogregames.com/search?q=*rhystic+study*' , scraper_gog.greyogregames_scraper, "greyogregames_rhystic")
 # scrape_to_file('https://www.greyogregames.com/search?q=*lightning*' , scraper_gog.greyogregames_scraper, "greyogregames_lightning")
-# scrape_to_file('https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A', scraper_gh.gameshaven_scraper, "gameshaven_cultivate")
-scrape_to_file('https://sg-manapro.com/collections/jumpstart-2022', scraper_mp.manapro_scraper, "manapro_jumpstart")
+scrape_to_file('https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A', scraper_gh.gameshaven_scraper, "gameshaven_cultivate_notwebpixel")
+# scrape_to_file('https://sg-manapro.com/collections/jumpstart-2022', scraper_mp.manapro_scraper, "manapro_jumpstart")
+
+
+# scrape_to_file('https://sg-manapro.com/search?type=product&options%5Bprefix%5D=last&q=barone', scraper_mp.manapro_scraper, "manapro_barone_notwebpixel")

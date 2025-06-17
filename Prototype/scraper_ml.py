@@ -142,5 +142,5 @@ def moxandlotus_scraper(url):
 
 
 # moxandlotus_scraper("https://www.moxandlotus.sg/products?title=cultivate")
-moxandlotus_scraper("https://www.moxandlotus.sg/products?title=lightning")
+# moxandlotus_scraper("https://www.moxandlotus.sg/products?title=lightning")
 # moxandlotus_scraper("https://moxandlotus.sg/products?title=golden%20throne")

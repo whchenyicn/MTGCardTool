@@ -23,7 +23,8 @@ def gameshaven_scrape_page(url):
         
         available_cards = productCard_lower.find("ul", class_= "productChip__grid").find_all("li")
         for card in available_cards:
-            if card['data-variantavailable'] == 'true':
+            # if card['data-variantavailable'] == 'true':
+            if True:
                 quantity = card['data-variantqty']
                 price = card['data-variantprice']
                 condition_foil = card['data-varianttitle']
@@ -100,6 +101,7 @@ def webpixels_gameshaven_scrape_page(url):
 
 def old_gameshaven_scrape_page(url):
     print(url)
+    cardlist = []
 
     req = urllib.request.Request(url, data=None, 
     headers={

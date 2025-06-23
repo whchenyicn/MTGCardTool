@@ -1,20 +1,30 @@
 from bs4 import BeautifulSoup
 import urllib.request
 import json
+import webpixel_scraper
+import time
+# import get_soup
 
 def gameshaven_scrape_page(url):
     print(url)
     cardlist = []
+    
 
     req = urllib.request.Request(url, data=None, 
     headers={
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    }    )
+    } 
+    )
     page = urllib.request.urlopen(req)
     html = page.read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
 
-    product_list = soup.find_all("div",class_="productCard__card")
+    # soup = get_soup.get_soup_proxy(url)
+    # soup = get_soup.get_soup(url)
+    id_to_sku = webpixel_scraper.get_id_dict(soup)
+    # print(id_to_sku)
+
+    product_list = soup.find_all("div", **{"class_" :"productCard__card", "data-producttype" : "MTG Single"} )
     for product in product_list:
         
         productCard_lower = product.find('div',class_="productCard__lower")
@@ -22,8 +32,12 @@ def gameshaven_scrape_page(url):
         set = productCard_lower.find('p',class_="productCard__setName").get_text()
         
         available_cards = productCard_lower.find("ul", class_= "productChip__grid").find_all("li")
+        sku = None
         for card in available_cards:
             # if card['data-variantavailable'] == 'true':
+            if sku == None:
+                id = card["onclick"][14:-1].split(',')[1].strip("/' ")
+                sku = id_to_sku[id]
             if True:
                 quantity = card['data-variantqty']
                 price = card['data-variantprice']
@@ -36,7 +50,7 @@ def gameshaven_scrape_page(url):
                     foil = False
                     condition = condition_foil.strip()
                     
-                cardlist.append([name,set,condition,foil,price,quantity])
+                cardlist.append([sku,name,set,condition,foil,price,quantity])
       
     pagination = soup.find("ol",class_="pagination")
     next_page = pagination.find_all("li")[-1]
@@ -52,15 +66,38 @@ def gameshaven_scraper(url):
     while url != None:
         cardlist,url = gameshaven_scrape_page(url)
         gameshaven_cardlist.extend(cardlist)
+        time.sleep(0.1)
 
     return gameshaven_cardlist
 
-#url = "https://www.gameshaventcg.com/search?page=1&q=%2A%2A"
-# url = 'https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A'
+# url = "https://www.gameshaventcg.com/search?page=1&q=%2A%2A"
+url = 'https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A'
 #url = 'https://www.gameshaventcg.com/collections/gh-standard-cards'
-#gameshaven_cardlist = gameshaven_scraper(url)
+
+
+
+# gameshaven_cardlist = gameshaven_scrape_page(url)
+
+
+
+# print(gameshaven_cardlist)
 #print(gameshaven_cardlist)
 #write_to_file('gameshaven_cardlist.csv',gameshaven_cardlist)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def webpixels_gameshaven_scrape_page(url):
     print(url)

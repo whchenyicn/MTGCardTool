@@ -16,6 +16,7 @@ import scraper_mtga
 import scraper_omtg
 import scraper_ca
 import scraper_cc
+import scraper_h
 
 
 def write_to_csv_file(filename,nestedlist):
@@ -47,6 +48,9 @@ def scrape_to_file(url ,scraper, filename):
 # scrape_to_file('https://www.greyogregames.com/search?q=*lightning*' , scraper_gog.greyogregames_scraper, "greyogregames_lightning")
 
 # scrape_to_file('https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A', scraper_gh.gameshaven_scraper, "gameshaven_cultivate_notwebpixel")
+
+
+# scrape_to_file('https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%2A', scraper_h.hideout_scraper, "hideout_cultivate")
 
 # scrape_to_file('https://sg-manapro.com/collections/jumpstart-2022', scraper_mp.manapro_scraper, "manapro_jumpstart")
 # scrape_to_file('https://sg-manapro.com/search?type=product&options%5Bprefix%5D=last&q=barone', scraper_mp.manapro_scraper, "manapro_barone_notwebpixel")

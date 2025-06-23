@@ -17,6 +17,7 @@ import scraper_omtg
 import scraper_ca
 import scraper_cc
 import scraper_h
+import scraper_dp
 
 
 def write_to_csv_file(filename,nestedlist):
@@ -65,3 +66,5 @@ def scrape_to_file(url ,scraper, filename):
 # scrape_to_file("https://card-affinity.com/search?type=product&options%5Bprefix%5D=last&q=cultivate", scraper_ca.cardaffinity_scraper , "cardaffinity_cultivate" )
 
 # scrape_to_file("https://cardscitadel.com/search?q=*cultivate*", scraper_cc.cardcitadel_scraper , "cardcitadel_cultivate" )
+
+# scrape_to_file("https://www.duellerspoint.com/products/search?utf8=%E2%9C%93&search_text=cultivate", scraper_dp.duellerspoint_scraper , "duellerspoint_cultivate")

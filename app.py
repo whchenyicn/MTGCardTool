@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
 import requests
-import os
 
 app = Flask(__name__)
 
@@ -57,8 +56,62 @@ def get_cards():
     except Exception as e:
         print(e)
         return jsonify({"error": "Error fetching from database"}), 500
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
 
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
 
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        if cursor.fetchone():
+            return jsonify({"error": "Username already exists"}), 409
+
+        password_hash = generate_password_hash(password)
+
+        cursor.execute(
+            "INSERT INTO users (username, password_hash) VALUES (%s, %s)",
+            (username, password_hash)
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "User registered successfully!"})
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Database error"}), 500
+    
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT password_hash FROM users WHERE username = %s", (username,))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if result and check_password_hash(result[0], password):
+            return jsonify({"message": "Login successful"})
+        else:
+            return jsonify({"error": "Invalid username or password"}), 401
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Database error"}), 500
+    
 #Fetch card info and image from Scryfall
 @app.route('/api/scryfall')
 def fetch_scryfall():

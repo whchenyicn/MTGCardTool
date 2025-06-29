@@ -7,49 +7,44 @@
 </head>
 <body>
   <header>
-    <h1 id="cardName">Card Details</h1>
-    <a href="index.html">← Back to All Cards</a>
+    <h1>Card Details</h1>
+    <a href="index.html">← Back to Index</a>
   </header>
 
-  <main id="detailsContainer" class="card-grid"></main>
+  <main id="details"></main>
 
   <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+
+    async function loadDetails() {
+      const [pricesRes, scryfallRes] = await Promise.all([
+        fetch(`http://127.0.0.1:5000/api/cards?name=${encodeURIComponent(name)}`),
+        fetch(`http://127.0.0.1:5000/api/scryfall?name=${encodeURIComponent(name)}`)
+      ]);
+
+      const prices = await pricesRes.json();
+      const cardInfo = await scryfallRes.json();
+
+      const details = document.getElementById('details');
+      details.innerHTML = `
+        <h2>${cardInfo.name}</h2>
+        ${cardInfo.image ? `<img src="${cardInfo.image}" alt="${cardInfo.name}" style="max-width:300px;">` : ''}
+        <p><strong>Set:</strong> ${cardInfo.set}</p>
+        <p><strong>Type:</strong> ${cardInfo.type}</p>
+        <p><strong>Oracle Text:</strong> ${cardInfo.oracle_text}</p>
+        <h3>Available From:</h3>
+        <ul>
+          ${prices.map(p => `
+            <li>
+              ${p.store} - $${(p.price / 100).toFixed(2)} (${p.condition}${p.foil ? ', Foil' : ''}) - Stock: ${p.stock}
+            </li>
+          `).join('')}
+        </ul>
+      `;
     }
 
-    const cardName = getQueryParam("name");
-    document.getElementById("cardName").textContent = cardName || "Card Not Found";
-
-    fetch("cards.json")
-      .then(response => response.json())
-      .then(data => {
-        const filtered = data.filter(card => card.name === cardName);
-
-        const container = document.getElementById("detailsContainer");
-        if (filtered.length === 0) {
-          container.innerHTML = "<p>No data found for this card.</p>";
-          return;
-        }
-
-        filtered.forEach(card => {
-          const cardDiv = document.createElement("div");
-          cardDiv.className = "card";
-          cardDiv.innerHTML = `
-            <h2>${card.name}</h2>
-            <p>Set: ${card.set}</p>
-            <p>Condition: ${card.condition}</p>
-            <p>Foil: ${card.foil ? "Yes" : "No"}</p>
-            <p class="price">$${card.price.toFixed(2)}</p>
-            <p>Store: ${card.store}</p>
-          `;
-          container.appendChild(cardDiv);
-        });
-      })
-      .catch(err => {
-        console.error("Error loading details:", err);
-      });
+    loadDetails();
   </script>
 </body>
 </html>

@@ -1,0 +1,179 @@
+/* Global Styles */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #1e2a38;
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.5rem 0;
+}
+
+header input {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: none;
+  width: 60%;
+  max-width: 400px;
+}
+
+a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Card Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  max-height: 75vh; 
+  overflow-y: auto; 
+}
+
+.pagination {
+  text-align: center;
+  margin-bottom: 2rem;
+  min-height: 50px;
+}
+
+
+/* Individual Card */
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.card {
+  min-height: 135px;  
+}
+
+.card img {
+  width: 100%;
+  max-width: 200px;
+  display: block;
+  margin: 0.5rem auto;
+}
+
+.card p {
+  margin: 0.3rem 0;
+}
+
+.card .price {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+/* Pagination */
+.pagination {
+  text-align: center;
+  margin-bottom: 2rem;
+  min-height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pagination button {
+  background-color: #007acc;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  min-width: 40px; 
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination button:hover {
+  background-color: #005fa3;
+}
+
+.pagination button:disabled {
+  background-color: gray;
+  cursor: default;
+}
+
+.pagination span {
+  margin: 0 4px;
+  color: gray;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Details Page */
+main#details {
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+main#details img {
+  display: block;
+  margin: 0 auto 1rem;
+  max-width: 300px;
+}
+
+main#details h2 {
+  text-align: center;
+}
+
+main#details ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+main#details li {
+  background-color: #f0f0f0;
+  margin: 0.5rem 0;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+}
+
+/* Back Link */
+header a {
+  color: white;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
+
+header a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MTG Card Price Comparison</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>MTG Card Price Comparison</h1>
+    <p>Compare prices across local stores in Singapore</p>
+    <input type="text" id="searchInput" placeholder="Search for a card..." />
+  </header>
+
+  <main class="card-grid" id="cardGrid"></main>
+
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    let cards = [];
+    let groupedCards = {};
+    let currentPage = 1;
+    const cardsPerPage = 20;
+
+    async function fetchCards() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/cards?name=");
+        cards = await response.json();
+
+        // Group by card name (pick lowest price)
+        groupedCards = {};
+        for (const card of cards) {
+          if (!groupedCards[card.name] || card.price < groupedCards[card.name].price) {
+            groupedCards[card.name] = card;
+          }
+        }
+
+        displayCards();
+        setupPagination();
+      } catch (error) {
+        console.error("Failed to load data from API", error);
+      }
+    }
+
+    function displayCards(filteredNames = null) {
+      const container = document.getElementById("cardGrid");
+      container.innerHTML = "";
+
+      const allNames = filteredNames || Object.keys(groupedCards);
+      const start = (currentPage - 1) * cardsPerPage;
+      const end = start + cardsPerPage;
+      const pageNames = allNames.slice(start, end);
+
+      for (const name of pageNames) {
+        const card = groupedCards[name];
+
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        cardDiv.innerHTML = `
+          <h2>${name}</h2>
+          <p>Lowest Price: $${(card.price / 100).toFixed(2)} (${card.store})</p>
+          <a href="details.html?name=${encodeURIComponent(name)}">View Details</a>
+        `;
+        container.appendChild(cardDiv);
+      }
+    }
+
+function setupPagination(filteredNames = null) {
+  const container = document.getElementById("pagination");
+  container.innerHTML = "";
+
+  const totalItems = (filteredNames || Object.keys(groupedCards)).length;
+  const totalPages = Math.ceil(totalItems / cardsPerPage);
+
+  const maxVisible = 2; // number of neighbors around current page
+
+  function createButton(label, page) {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    if (page === currentPage) btn.disabled = true;
+    btn.onclick = () => {
+      currentPage = page;
+      displayCards(filteredNames);
+      setupPagination(filteredNames);
+    };
+    container.appendChild(btn);
+  }
+
+  // Previous
+  if (currentPage > 1) {
+    const prev = document.createElement("button");
+    prev.textContent = "<<";
+    prev.onclick = () => {
+      currentPage -= 1;
+      displayCards(filteredNames);
+      setupPagination(filteredNames);
+    };
+    container.appendChild(prev);
+  }
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i <= 2 || // first 2
+      i > totalPages - 2 || // last 2
+      Math.abs(i - currentPage) <= maxVisible // near current
+    ) {
+      createButton(i, i);
+    } else if (
+      (i === 3 && currentPage > 5) || // after 1, 2
+      (i === totalPages - 2 && currentPage < totalPages - 4) // before last pages
+    ) {
+      const dots = document.createElement("span");
+      dots.textContent = "...";
+      container.appendChild(dots);
+    }
+  }
+
+  // Next
+  if (currentPage < totalPages) {
+    const next = document.createElement("button");
+    next.textContent = ">>";
+    next.onclick = () => {
+      currentPage += 1;
+      displayCards(filteredNames);
+      setupPagination(filteredNames);
+    };
+    container.appendChild(next);
+  }
+}
+
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const term = this.value.toLowerCase();
+      const filtered = Object.keys(groupedCards).filter(name =>
+        name.toLowerCase().includes(term)
+      );
+      currentPage = 1;
+      displayCards(filtered);
+      setupPagination(filtered);
+    });
+
+    fetchCards();
+  </script>
+</body>
+</html>

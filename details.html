@@ -19,8 +19,8 @@
 
     async function loadDetails() {
       const [pricesRes, scryfallRes] = await Promise.all([
-        fetch(`http://127.0.0.1:5000/api/cards?name=${encodeURIComponent(name)}`),
-        fetch(`http://127.0.0.1:5000/api/scryfall?name=${encodeURIComponent(name)}`)
+        fetch(`https://mtgcardtool-1.onrender.com/api/cards?name=${encodeURIComponent(name)}`),
+        fetch(`https://mtgcardtool-1.onrender.com/api/scryfall?name=${encodeURIComponent(name)}`)
       ]);
 
       const prices = await pricesRes.json();

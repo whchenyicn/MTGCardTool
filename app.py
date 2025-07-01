@@ -13,13 +13,13 @@ CORS(app)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 #DATABASE_URL = "postgresql://neondb_owner:npg_G4gqZLHj0wix@ep-green-tree-a1zfpwi0-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
-try:
-    conn = psycopg2.connect(DATABASE_URL)
-    cursor = conn.cursor()
-    print("Connected to Neon DB successfully!")
-except Exception as e:
-    print("Failed to connect to Neon DB")
-    print(e)
+#try:
+    #conn = psycopg2.connect(DATABASE_URL)
+    #cursor = conn.cursor()
+    #print("Connected to Neon DB successfully!")
+#except Exception as e:
+    #print("Failed to connect to Neon DB")
+    #print(e)
 
 @app.route('/')
 def home():
@@ -31,6 +31,10 @@ def home():
 def get_cards():
     name_query = request.args.get('name', '')
     try:
+        
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
         cursor.execute(
             """
             SELECT name, set, condition, foil, price, stock, store
@@ -70,6 +74,8 @@ def register():
 
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         if cursor.fetchone():
+            cursor.close()
+            conn.close()
             return jsonify({"error": "Username already exists"}), 409
 
         password_hash = generate_password_hash(password)

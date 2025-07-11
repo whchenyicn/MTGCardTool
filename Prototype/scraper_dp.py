@@ -3,11 +3,12 @@ import urllib.request
 import json
 import time
 
+condition_dict = {"Near Mint": 1 , "Lightly Played": 2, "Moderately Played": 3, "Heavily Played": 4, "Damaged": 5 }
 
 def duellerspoint_scrape_page(url):
     print(url)
     cardlist = []
-    
+    out_of_stock = False
 
     req = urllib.request.Request(url, data=None, 
 
@@ -22,27 +23,52 @@ def duellerspoint_scrape_page(url):
 
     product_list = soup.find("tbody").find_all("tr")
     for product in product_list:
-        card_dict = {}
         td_list = product.find_all("td")
-        card_dict["href"] = td_list[1].find("a")["href"]
-        card_dict["name"] = td_list[1].find("a").text
-        card_dict["set"]  = td_list[2].find("strong").text
-
-        for p in td_list[3].find_all("p"):
-            card_dict[p.find("span").text[0:-3]] = p.find("strong").text
-        
         stock = td_list[4].find("label").text
         if stock == "Out of Stock":
-            card_dict["quantity"]  = 0
+            out_of_stock = True
+            break
+
+
+        card_dict = {"store": "Dueller's Point", "store_id": None}
+        card_dict["set"]  = td_list[2].find("strong").text
+        name_list = td_list[1].find("a").text.split("(")
+        card_dict["col_number"] = name_list.pop(0).strip()
+        card_dict["foil"] = td_list[1].find("span") != None
+        if card_dict["foil"]:
+            foil_str = name_list.pop()
+            if foil_str != "Foil)":
+                print(foil_str)
+
+        temp_dict = {}
+        for p in td_list[3].find_all("p"):
+            temp_dict[p.find("span").text[0:-3]] = p.find("strong").text
+
+        card_dict["condition"] = condition_dict[temp_dict["Condition"]]
+        
+        if len(name_list) == 0:
+            card_dict["lang"] = "en"
+            card_dict["bullshit"] = None
         else:
-            card_dict["quantity"]  = int(stock[:-5])
+            bullshit = ",".join(name_list)
+            if "jp " in bullshit or "japanese" in bullshit:
+                card_dict["lang"] = "jp"
+            else:
+                card_dict["lang"] = "en"
+            card_dict["bullshit"] = bullshit
 
         card_dict["price"]  = int(td_list[5].find("span").text[2:].replace(".",""))
+
+        card_dict["available"] = True
+        card_dict["quantity"]  = int(stock[:-5])
+
+        
+        card_dict["store_link"] = "https://www.duellerspoint.com/" + td_list[1].find("a")["href"]
 
         cardlist.append(card_dict)
 
     next_page = soup.find("a", rel = "next")
-    if next_page == None:
+    if next_page == None or out_of_stock:
         next_page_url = None
     else:
         next_page_url = "https://www.duellerspoint.com/" + next_page["href"]
@@ -54,6 +80,7 @@ def duellerspoint_scraper(url):
     while url != None:
         cardlist,url = duellerspoint_scrape_page(url)
         duellerspoint_cardlist.extend(cardlist)
+        time.sleep(0.1)
 
     return duellerspoint_cardlist
 

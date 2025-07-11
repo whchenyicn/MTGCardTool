@@ -66,7 +66,7 @@ def old_agorahobby_scrape_page(url):
         sale_price = product_info['sale_price']
         title = product.find('div',class_="store-item-title").get_text()
         
-        cardlist.append([title,sku,quantity,price,regular_price,sale_price])
+        cardlist.append({"title": title,"sku": sku, "quantity": quantity, "price" : price, "regular_price": regular_price, "sale_price" : sale_price})
     
     next_page = soup.find_all("a",class_="page-next")
     if len(next_page) > 0:

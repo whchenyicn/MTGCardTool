@@ -3,6 +3,8 @@ import urllib.request
 import json
 import time
 
+all_url = "https://www.duellerspoint.com/products/search?button=&card+type_ids%5B%5D=&category_ids%5B%5D=10&color_ids%5B%5D=&condition_ids%5B%5D=&edition_ids%5B%5D=&foil_type=&rarity_ids%5B%5D=&search_text=&stock_type=available"
+
 condition_dict = {"Near Mint": 1 , "Lightly Played": 2, "Moderately Played": 3, "Heavily Played": 4, "Damaged": 5 }
 
 def duellerspoint_scrape_page(url):
@@ -30,10 +32,12 @@ def duellerspoint_scrape_page(url):
             break
 
 
-        card_dict = {"store": "Dueller's Point", "store_id": None}
-        card_dict["set"]  = td_list[2].find("strong").text
+        card_dict = {"store": "Dueller's Point"}
+        
+        card_dict["name"]  = td_list[2].find("strong").text
         name_list = td_list[1].find("a").text.split("(")
-        card_dict["col_number"] = name_list.pop(0).strip()
+        card_dict["set"] = name_list.pop(0).strip()
+        card_dict["col_number"] = None
         card_dict["foil"] = td_list[1].find("span") != None
         if card_dict["foil"]:
             foil_str = name_list.pop()
@@ -64,6 +68,8 @@ def duellerspoint_scrape_page(url):
 
         
         card_dict["store_link"] = "https://www.duellerspoint.com/" + td_list[1].find("a")["href"]
+
+        card_dict["store_id"] = td_list[1].find("a")["href"].split("/")[-1]
 
         cardlist.append(card_dict)
 

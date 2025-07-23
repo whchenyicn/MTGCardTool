@@ -17,6 +17,14 @@ def template_scrape_page(url, base_url, store_name):
     } 
     )
     page = urllib.request.urlopen(req)
+    actual_url = page.url
+    
+    if actual_url != url:
+
+        print("URL error")
+        print("actual url:", actual_url)
+        return [], None
+
     html = page.read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
 
@@ -25,41 +33,50 @@ def template_scrape_page(url, base_url, store_name):
     id_to_sku = webpixel_scraper.get_id_dict(soup)
     # print(id_to_sku)
 
-    out_of_stock = False
+    out_of_stock = True
 
     product_list = soup.find_all("div", **{"class_" :"productCard__card", "data-producttype" : "MTG Single"} )
+
     for product in product_list:
         if product.find("form") == None:
-            out_of_stock = True
-            print("out of stock")
-            break
+            continue
+        else:
+            out_of_stock = False
+        
 
         store_link = base_url + product.find("a")["href"]
 
         productCard_lower = product.find('div',class_="productCard__lower")
-        # name = productCard_lower.find('p',class_="productCard__title").get_text().strip()
+        name = productCard_lower.find('p',class_="productCard__title").get_text().strip()
         # set = productCard_lower.find('p',class_="productCard__setName").get_text()
         
         available_cards = productCard_lower.find("ul", class_= "productChip__grid").find_all("li")
         first_card = available_cards[0]
-        sku = id_to_sku[first_card["onclick"][14:-1].split(',')[1].strip("/' ")].split("-")
-        if len(sku) < 5:
+        sku = id_to_sku[first_card["onclick"][14:-1].split(',')[1].strip("/' ")]
+        if sku != None:
+            sku_list = sku.split("-")
+        sku_list = sku.split("-")
+        if sku == None or len(sku_list) < 5:
             print("SKU Error:", sku)
-            continue
-        bullshit = None
-        set = sku[0].lower()
-        col_number = sku[1].lower()
-        lang = sku[-3].lower()
-
-        if len(sku) > 5:
-            bullshit = sku[2]
+            bullshit = "SKU Error"
+            set = None
+            col_number = None
+            lang = None
         else:
             bullshit = None
+            set = sku_list[0].lower()
+            col_number = sku_list[1].lower()
+            lang = sku_list[-3].lower()
+
+            if len(sku_list) > 5:
+                bullshit = sku_list[2]
+            else:
+                bullshit = None
 
         for card in available_cards:
             if card['data-variantavailable'] == 'true':
-                card_dict = {"store": store_name,"set": set, "col_number": col_number, "bullshit": bullshit, "lang": lang }
-                card_dict["store_id"] = card["onclick"][14:-1].split(',')[1].strip("/' ")
+                store_id = int(card["onclick"][14:-1].split(',')[1].strip("/' "))
+                card_dict = {"store": store_name, "store_id": store_id, "name": name, "sku":sku, "set": set, "col_number": col_number, "lang": lang, "bullshit": bullshit }
                     
                 # card_dict["set"] = set
                 # card_dict["col_number"] = col_number
@@ -85,15 +102,21 @@ def template_scrape_page(url, base_url, store_name):
                 cardlist.append(card_dict)
       
 
-    if out_of_stock:
+    if out_of_stock: #Only if entire page of cards is out of stock
+        print("out of stock")
         return cardlist,None  #Stops going through products once out of stock
+    
+
     pagination = soup.find("ol",class_="pagination")
     # print(pagination)
-    next_page = pagination.find_all("li")[-1]
-    if next_page.has_attr('class'):
+    if pagination == None: # There is only one page
         next_page_url = None
     else:
-        next_page_url = base_url + next_page.a['href']
+        next_page = pagination.find_all("li")[-1]
+        if next_page.has_attr('class'): #This is the last page
+            next_page_url = None
+        else:
+            next_page_url = base_url + next_page.a['href']
     return cardlist,next_page_url
 
 def template_scraper(url, base_url, store_name):
@@ -105,6 +128,19 @@ def template_scraper(url, base_url, store_name):
         time.sleep(0.1)
 
     return out
+
+def gameshaven_scrape_page(url):
+    return template_scrape_page(url, "https://www.gameshaventcg.com/", "Games Haven" )
+
+def greyogregames_scrape_page(url):
+    return template_scrape_page(url, "https://www.greyogregames.com/", "Grey Ogre Games" )
+
+def hideout_scrape_page(url):
+    return template_scrape_page(url, "https://hideoutcg.com/", "Hideout" )
+
+
+
+
 
 def gameshaven_scraper(url):
     return template_scraper(url, "https://www.gameshaventcg.com/", "Games Haven" )
@@ -129,3 +165,7 @@ def hideout_scraper(url):
 
 # def manapro_scraper(url):
 #     return template_scraper(url, 'https://sg-manapro.com/', "Mana Pro" )
+
+
+# cardlist = gameshaven_scraper("https://www.gameshaventcg.com/search?page=1&q=%2Acultivate%20fallouit%2A")
+# print(cardlist)
